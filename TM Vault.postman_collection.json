@@ -1,0 +1,1763 @@
+{
+	"info": {
+		"_postman_id": "a7d6fe30-c476-4020-9724-ce338cdd4ce4",
+		"name": "TM Vault",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Accounts",
+			"item": [
+				{
+					"name": "Get customer accounts",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{core_api}}/v1/accounts?page_size=1000&stakeholder_id=14324324234223432",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"accounts"
+							],
+							"query": [
+								{
+									"key": "page_size",
+									"value": "1000"
+								},
+								{
+									"key": "stakeholder_id",
+									"value": "14324324234223432"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create customer account",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"permitted_denominations = ['GBP']\r",
+									"pm.environment.set('permitted_denominations', JSON.stringify(permitted_denominations))\r",
+									"\r",
+									"statuses = [\r",
+									"    'ACCOUNT_STATUS_UNKNOWN',\r",
+									"    'ACCOUNT_STATUS_OPEN',\r",
+									"    'ACCOUNT_STATUS_CLOSED',\r",
+									"    'ACCOUNT_STATUS_CANCELLED',\r",
+									"    'ACCOUNT_STATUS_PENDING_CLOSURE',\r",
+									"    'ACCOUNT_STATUS_PENDING'\r",
+									"]\r",
+									"pm.environment.set('status', statuses[0])\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"account\": {\r\n        \"product_id\": \"{{product_id}}\",\r\n        \"permitted_denominations\": {{permitted_denominations}},\r\n        \"status\": \"{{status}}\",\r\n        \"opening_timestamp\": null,\r\n        \"stakeholder_ids\": [\r\n            \"{{customer_id}}\"\r\n        ],\r\n        \"instance_param_vals\": {\r\n            \"daily_atm_withdrawal_limit\": \"1000\",\r\n            \"interest_application_day\": \"1\",\r\n            \"unarranged_overdraft_limit\": \"0\",\r\n            \"arranged_overdraft_limit\": \"0\"\r\n\r\n        },\r\n        \"details\": {}\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/accounts",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update customer account",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"statuses = [\r",
+									"    'ACCOUNT_STATUS_UNKNOWN',\r",
+									"    'ACCOUNT_STATUS_OPEN',\r",
+									"    'ACCOUNT_STATUS_CLOSED',\r",
+									"    'ACCOUNT_STATUS_CANCELLED',\r",
+									"    'ACCOUNT_STATUS_PENDING_CLOSURE',\r",
+									"    'ACCOUNT_STATUS_PENDING'\r",
+									"]\r",
+									"pm.environment.set('status', statuses[1])\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"account\": {\r\n        \"stakeholder_ids\": [\r\n            \"1\",\"2\"\r\n        ]\r\n    },\r\n    \"update_mask\": {\r\n        \"paths\": [\r\n            \"stakeholder_ids\"\r\n        ]\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/accounts/1234",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"accounts",
+								"1234"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Migrate account",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"schedule_migration_types = [\r",
+									"    'SCHEDULE_MIGRATION_TYPE_RECREATE_ALL_SCHEDULES_AND_GROUPS',\r",
+									"    'SCHEDULE_MIGRATION_TYPE_PRESERVE_SCHEDULES_IF_NO_GROUP_CHANGES'\r",
+									"]\r",
+									"pm.environment.set('schedule_migration_type', schedule_migration_types[0])\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"account_migration\": {\r\n        \"product_version_migration\": {\r\n            \"from_product_version_ids\": [\r\n                \"80\"\r\n            ],\r\n            \"to_product_version_id\": \"81\",\r\n            \"schedule_migration_type\": \"{{schedule_migration_type}}\"\r\n        }\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/account-migrations",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"account-migrations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update account migration",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"schedule_migration_types = [\r",
+									"    'SCHEDULE_MIGRATION_TYPE_RECREATE_ALL_SCHEDULES_AND_GROUPS',\r",
+									"    'SCHEDULE_MIGRATION_TYPE_PRESERVE_SCHEDULES_IF_NO_GROUP_CHANGES'\r",
+									"]\r",
+									"pm.environment.set('schedule_migration_type', schedule_migration_types[0])\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"account_update\": {\r\n        \"account_id\": \"{{account_id}}\",\r\n        \"instance_param_vals_update\": {\r\n            \"instance_param_vals\": {}\r\n        },\r\n        \"product_version_update\": {\r\n            \"product_version_id\": \"86\",\r\n            \"instance_param_vals_to_add\": {},\r\n            \"schedule_migration_type\": \"{{schedule_migration_type}}\"\r\n        }\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/account-updates",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"account-updates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update account instance param update",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"schedule_migration_types = [\r",
+									"    'SCHEDULE_MIGRATION_TYPE_RECREATE_ALL_SCHEDULES_AND_GROUPS',\r",
+									"    'SCHEDULE_MIGRATION_TYPE_PRESERVE_SCHEDULES_IF_NO_GROUP_CHANGES'\r",
+									"]\r",
+									"pm.environment.set('schedule_migration_type', schedule_migration_types[0])\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"account_update\": {\r\n        \"account_id\": \"fbc3c0e1-a0fa-d86e-00fc-170c721695b5\",\r\n        \"instance_param_vals_update\": {\r\n            \"instance_param_vals\": {\r\n                \"tiered_minimum_balance_threshold\":\"{\\\"standard\\\": \\\"0\\\"}\"\r\n            }\r\n        }\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/account-updates",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"account-updates"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Customers",
+			"item": [
+				{
+					"name": "Get customers",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{core_api}}/v1/customers?page_size=100",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"customers"
+							],
+							"query": [
+								{
+									"key": "page_size",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get customer",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{core_api}}/v1/customers/{{customer_id}}",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"customers",
+								"{{customer_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create customer",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"\r",
+									"\r",
+									"randomDate = (start, end) => new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString().split('T')[0]\r",
+									"dob = randomDate(new Date(1950, 0, 1), new Date(2000, 0, 1))\r",
+									"pm.environment.set('dob', dob)\r",
+									"\r",
+									"randomPhoneNumber = () => Math.floor(Math.random() * 1000000000)\r",
+									"pm.environment.set('randomMobilePhoneNumber', randomPhoneNumber())\r",
+									"pm.environment.set('randomHomePhoneNumber', randomPhoneNumber())\r",
+									"pm.environment.set('randomBusinessPhoneNumber', randomPhoneNumber())\r",
+									"\r",
+									"statuses = [\r",
+									"    'CUSTOMER_STATUS_UNKNOWN',\r",
+									"    'CUSTOMER_STATUS_ACTIVE',\r",
+									"    'CUSTOMER_STATUS_FROZEN',\r",
+									"    'CUSTOMER_STATUS_DECEASED',\r",
+									"    'CUSTOMER_STATUS_PROSPECT'\r",
+									"]\r",
+									"pm.environment.set('status', statuses[1])\r",
+									"\r",
+									"identifier_types = [\r",
+									"    'IDENTIFIER_TYPE_UNKNOWN',\r",
+									"    'IDENTIFIER_TYPE_USERNAME',\r",
+									"    'IDENTIFIER_TYPE_EMAIL',\r",
+									"    'IDENTIFIER_TYPE_PHONE'\r",
+									"]\r",
+									"pm.environment.set('identifier_type', identifier_types[2])\r",
+									"\r",
+									"titles = [\r",
+									"    'CUSTOMER_TITLE_UNKNOWN',\r",
+									"    'CUSTOMER_TITLE_MISS',\r",
+									"    'CUSTOMER_TITLE_MR',\r",
+									"    'CUSTOMER_TITLE_MRS',\r",
+									"    'CUSTOMER_TITLE_MS'\r",
+									"]\r",
+									"pm.environment.set('title', titles[1])\r",
+									"\r",
+									"genders = [\r",
+									"    'CUSTOMER_GENDER_UNKNOWN',\r",
+									"    'CUSTOMER_GENDER_FEMALE',\r",
+									"    'CUSTOMER_GENDER_MALE'\r",
+									"]\r",
+									"pm.environment.set('gender', genders[0])\r",
+									"\r",
+									"genders = [\r",
+									"    'CUSTOMER_GENDER_UNKNOWN',\r",
+									"    'CUSTOMER_GENDER_FEMALE',\r",
+									"    'CUSTOMER_GENDER_MALE'\r",
+									"]\r",
+									"pm.environment.set('gender', genders[0])\r",
+									"\r",
+									"contact_methods = [\r",
+									"    'CUSTOMER_CONTACT_METHOD_UNKNOWN',\r",
+									"    'CUSTOMER_CONTACT_METHOD_NONE',\r",
+									"    'CUSTOMER_CONTACT_METHOD_EMAIL',\r",
+									"    'CUSTOMER_CONTACT_METHOD_SMS',\r",
+									"    'CUSTOMER_CONTACT_METHOD_NOTIFICATION'\r",
+									"]\r",
+									"pm.environment.set('contact_method', contact_methods[0])\r",
+									"\r",
+									"accessibilities = [\r",
+									"    'CUSTOMER_ACCESSIBILITY_UNKNOWN',\r",
+									"    'CUSTOMER_ACCESSIBILITY_AUDIO',\r",
+									"    'CUSTOMER_ACCESSIBILITY_LARGE_PRINT',\r",
+									"    'CUSTOMER_ACCESSIBILITY_BRAILLE',\r",
+									"    'CUSTOMER_ACCESSIBILITY_DEAF'\r",
+									"]\r",
+									"pm.environment.set('accessibility', accessibilities[0])\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"customer\": {\r\n        \"status\": \"{{status}}\",\r\n        \"identifiers\": [\r\n            {\r\n                \"identifier_type\": \"{{identifier_type}}\",\r\n                \"identifier\": \"{{$randomEmail}}\"\r\n            }\r\n        ],\r\n        \"customer_details\": {\r\n            \"title\": \"{{title}}\",\r\n            \"first_name\": \"Twoj\",\r\n            \"middle_name\": \"\",\r\n            \"last_name\": \"Stary\",\r\n            \"dob\": \"{{dob}}\",\r\n            \"gender\": \"{{gender}}\",\r\n            \"nationality\": \"British\",\r\n            \"email_address\": \"{{$randomEmail}}\",\r\n            \"mobile_phone_number\": \"+44{{randomMobilePhoneNumber}}\",\r\n            \"home_phone_number\": \"+44{{randomHomePhoneNumber}}\",\r\n            \"business_phone_number\": \"+44{{randomBusinessPhoneNumber}}\",\r\n            \"contact_method\": \"{{contact_method}}\",\r\n            \"country_of_residence\": \"GB\",\r\n            \"country_of_taxation\": \"GB\",\r\n            \"accessibility\": \"{{accessibility}}\",\r\n            \"external_customer_id\": null\r\n        },\r\n        \"additional_details\": {}\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/customers",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"customers"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payment devices",
+			"item": [
+				{
+					"name": "Get payment devices",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{core_api}}/v1/payment-devices:batchGet?ids={{payment_device_id}}",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"payment-devices:batchGet"
+							],
+							"query": [
+								{
+									"key": "ids",
+									"value": "{{payment_device_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create payment device",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"statuses = [\r",
+									"    'PAYMENT_DEVICE_STATUS_UNKNOWN',\r",
+									"    'PAYMENT_DEVICE_STATUS_PENDING',\r",
+									"    'PAYMENT_DEVICE_STATUS_ACTIVE',\r",
+									"    'PAYMENT_DEVICE_STATUS_INACTIVE'\r",
+									"]\r",
+									"pm.environment.set('status', statuses[2])\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"payment_device\": {\r\n        \"routing_info\": {\r\n            \"IBAN\": \"{{$randomBankAccountIban}}\"\r\n        },\r\n        \"status\": \"{{status}}\"\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/payment-devices",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"payment-devices"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get payment device links",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{core_api}}/v1/payment-device-links?payment_device_ids={{payment_device_id}}",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"payment-device-links"
+							],
+							"query": [
+								{
+									"key": "payment_device_ids",
+									"value": "{{payment_device_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create payment device link",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"account_number = '700007000000000'\r",
+									"\r",
+									"statuses = [\r",
+									"    'PAYMENT_DEVICE_LINK_STATUS_UNKNOWN',\r",
+									"    'PAYMENT_DEVICE_LINK_STATUS_ACTIVE',\r",
+									"    'PAYMENT_DEVICE_LINK_STATUS_INACTIVE'\r",
+									"]\r",
+									"pm.environment.set('status', statuses[1])\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"payment_device_link\": {\r\n        \"token\": \"{{$guid}}\",\r\n        \"payment_device_id\": \"{{payment_device_id}}\",\r\n        \"account_id\": \"{{account_id}}\",\r\n        \"status\": \"{{status}}\"\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/payment-device-links",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"payment-device-links"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Plans",
+			"item": [
+				{
+					"name": "Create plan",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"plan\": {\r\n        \"supervisor_contract_version_id\": \"{{supervisor_contract_version_id}}\",\r\n        \"details\": {}\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/plans",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"plans"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Migrate plan",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"schedule_migration_types = [\r",
+									"    'SCHEDULE_MIGRATION_TYPE_RECREATE_ALL_SCHEDULES_AND_GROUPS',\r",
+									"    'SCHEDULE_MIGRATION_TYPE_PRESERVE_SCHEDULES_IF_NO_GROUP_CHANGES'\r",
+									"]\r",
+									"pm.environment.set('schedule_migration_type', schedule_migration_types[0])\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"plan_migration\": {\r\n        \"plan_id\": \"{{plan_id}}\",\r\n        \"supervisor_contract_version_migration\": {\r\n            \"from_supervisor_contract_version_ids\": [\r\n                \"2cdd3995-609e-4eae-8b2a-96906313f9a1\"\r\n            ],\r\n            \"to_supervisor_contract_version_id\": \"95174719-955a-4966-bb86-370064ea30c3\",\r\n            \"schedule_migration_type\": \"{{schedule_migration_type}}\"\r\n        }\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/plan-migrations",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"plan-migrations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update plan",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"statuses = [\r",
+									"    'PLAN_UPDATE_STATUS_UNKNOWN',\r",
+									"    'PLAN_UPDATE_STATUS_PENDING_EXECUTION',\r",
+									"    'PLAN_UPDATE_STATUS_COMPLETED',\r",
+									"    'PLAN_UPDATE_STATUS_REJECTED',\r",
+									"    'PLAN_UPDATE_STATUS_ERRORED'\r",
+									"]\r",
+									"pm.environment.set('status', statuses[0])\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"plan_update\": {\r\n        \"plan_id\": \"{{plan_id}}\",\r\n        \"status\": \"{{status}}\",\r\n        \"associate_account_update\": {\r\n            \"account_id\": \"{{account_id}}\"\r\n        }\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/plan-updates",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"plan-updates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get batch plan",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"statuses = [\r",
+									"    'PLAN_UPDATE_STATUS_UNKNOWN',\r",
+									"    'PLAN_UPDATE_STATUS_PENDING_EXECUTION',\r",
+									"    'PLAN_UPDATE_STATUS_COMPLETED',\r",
+									"    'PLAN_UPDATE_STATUS_REJECTED',\r",
+									"    'PLAN_UPDATE_STATUS_ERRORED'\r",
+									"]\r",
+									"pm.environment.set('status', statuses[0])\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"plan_update\": {\r\n        \"plan_id\": \"{{plan_id}}\",\r\n        \"status\": \"{{status}}\",\r\n        \"associate_account_update\": {\r\n            \"account_id\": \"{{account_id}}\"\r\n        }\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/plans:batchGet?ids=2cdd3995-609e-4eae-8b2a-96906313f9a1",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"plans:batchGet"
+							],
+							"query": [
+								{
+									"key": "ids",
+									"value": "2cdd3995-609e-4eae-8b2a-96906313f9a1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get plan links",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"statuses = [\r",
+									"    'PLAN_UPDATE_STATUS_UNKNOWN',\r",
+									"    'PLAN_UPDATE_STATUS_PENDING_EXECUTION',\r",
+									"    'PLAN_UPDATE_STATUS_COMPLETED',\r",
+									"    'PLAN_UPDATE_STATUS_REJECTED',\r",
+									"    'PLAN_UPDATE_STATUS_ERRORED'\r",
+									"]\r",
+									"pm.environment.set('status', statuses[0])\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/account-plan-assocs?account_ids=8cb1d069-0f01-f198-fc3f-7d185a4c04d8\"&page_size=100",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"account-plan-assocs"
+							],
+							"query": [
+								{
+									"key": "account_ids",
+									"value": "8cb1d069-0f01-f198-fc3f-7d185a4c04d8\""
+								},
+								{
+									"key": "page_size",
+									"value": "100"
+								},
+								{
+									"key": "account_ids",
+									"value": "577afc06-5015-adff-3a2c-23a1addcbc17",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Posting instruction batches",
+			"item": [
+				{
+					"name": "Get posting instruction batch",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host}}/v1/posting-instruction-batches/{{posting_instruction_batch_id}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"v1",
+								"posting-instruction-batches",
+								"{{posting_instruction_batch_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get posting instruction batches",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host}}/v1/posting-instruction-batches?page_size=100&account_ids={{account_id}}&payment_device_tokens={{payment_device_token}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"v1",
+								"posting-instruction-batches"
+							],
+							"query": [
+								{
+									"key": "page_size",
+									"value": "100"
+								},
+								{
+									"key": "account_ids",
+									"value": "{{account_id}}"
+								},
+								{
+									"key": "payment_device_tokens",
+									"value": "{{payment_device_token}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get posting instruction batches Copy",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{host}}/v1/posting-instruction-batches?page_size=100&account_ids={{account_id}}&payment_device_tokens={{payment_device_token}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"v1",
+								"posting-instruction-batches"
+							],
+							"query": [
+								{
+									"key": "page_size",
+									"value": "100"
+								},
+								{
+									"key": "account_ids",
+									"value": "{{account_id}}"
+								},
+								{
+									"key": "payment_device_tokens",
+									"value": "{{payment_device_token}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create posting instruction batch",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"request_id\":\"b40ed2d4-8761-4791-9b43-bb8b5e9b2efe2\",\r\n   \"posting_instruction_batch\":{\r\n      \"client_id\":\"AsyncCreatePostingInstructionBatch\",\r\n      \"client_batch_id\":\"d3da1433-b5c0-42fa-89d4-d30e5ba7724e2\",\r\n      \"posting_instructions\":[\r\n         {\r\n            \"client_transaction_id\":\"6fdc2079-3c2f-4cf0-9d37-ec45880c0aee2\",\r\n            \"instruction_details\":null,\r\n            \"override\":null,\r\n            \"transaction_code\":null,\r\n            \"outbound_authorisation\":null,\r\n            \"inbound_authorisation\":null,\r\n            \"authorisation_adjustment\":null,\r\n            \"settlement\":null,\r\n            \"release\":null,\r\n            \"inbound_hard_settlement\":{\r\n                \"amount\":\"25000\",\r\n                \"denomination\":\"MYR\",\r\n                \"target_account\":{\r\n                    \"account_id\":\"1fe96575-2b64-45b5-9c37-360cac4786f9\"\r\n                },\r\n                \"internal_account_id\":\"111111\",\r\n                \"advice\":true\r\n\r\n            },\r\n            \"outbound_hard_settlement\":null,\r\n            \"custom_instruction\":null\r\n         }\r\n      ],\r\n      \"batch_details\":{\r\n         \"force_override\":\"true\"\r\n      },\r\n      \"value_timestamp\":null,\r\n      \"api_type\":\"POSTINGS_API_TYPE_HIGH_PRIORITY\"\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{host}}/v1/posting-instruction-batches:asyncCreate",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"v1",
+								"posting-instruction-batches:asyncCreate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Postings API clients",
+			"item": [
+				{
+					"name": "Get postings API clients",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/postings-api-clients?page_size=100",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"postings-api-clients"
+							],
+							"query": [
+								{
+									"key": "page_size",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Get products",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{core_api}}/v1/products?page_size=30",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"products"
+							],
+							"query": [
+								{
+									"key": "page_size",
+									"value": "30"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET product versions",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{core_api}}/v1/product-versions?page_size=30&product_id={{product_id}}",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"product-versions"
+							],
+							"query": [
+								{
+									"key": "page_size",
+									"value": "30"
+								},
+								{
+									"key": "product_id",
+									"value": "{{product_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create product version",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// A globally-unique ID for the product version.\r",
+									"pm.environment.set('new_product_version_id', 0) // 0 - auto increment\r",
+									"\r",
+									"// The denominations supported by this product version. \r",
+									"supported_denominations = ['GBP']\r",
+									"pm.environment.set('supported_denominations', JSON.stringify(supported_denominations))\r",
+									"\r",
+									"// The Smart Contract code for the product version.\r",
+									"api = '3.9.0'\r",
+									"version = '0.0.1'\r",
+									"code = `\r",
+									"display_name = 'First Internal Account'\r",
+									"api = '${api}'\r",
+									"version = '${version}'\r",
+									"summary = 'Internal Account test'\r",
+									"tside = Tside.LIABILITY\r",
+									"`\r",
+									"pm.environment.set('code', JSON.stringify(code))\r",
+									"\r",
+									"migration_strategies = [\r",
+									"    'PRODUCT_VERSION_MIGRATION_STRATEGY_UNKNOWN',\r",
+									"    'PRODUCT_VERSION_MIGRATION_STRATEGY_NEW_PRODUCT',\r",
+									"    'PRODUCT_VERSION_MIGRATION_STRATEGY_ADD_VERSION',\r",
+									"    'PRODUCT_VERSION_MIGRATION_STRATEGY_ADD_VERSION_APPLY_NEW_USERS',\r",
+									"    'PRODUCT_VERSION_MIGRATION_STRATEGY_ADD_VERSION_ASK_EXISTING_USERS',\r",
+									"    'PRODUCT_VERSION_MIGRATION_STRATEGY_ADD_VERSION_AUTO_MIGRATE_USERS', // set new version as current\r",
+									"    'PRODUCT_VERSION_MIGRATION_STRATEGY_ADD_VERSION_UPGRADE_INTERNAL_ACCOUNTS'\r",
+									"]\r",
+									"pm.environment.set('migration_strategy', migration_strategies[1])"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"product_version\": {\r\n        \"id\": \"{{new_product_version_id}}\",\r\n        \"params\": [],\r\n        \"code\": {{code}},\r\n        \"product_id\": \"InternalAccount\",\r\n        \"supported_denominations\": {{supported_denominations}}\r\n    },\r\n    \"is_internal\": true,\r\n    \"migration_strategy\": \"{{migration_strategy}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/product-versions",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"product-versions"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Supervisor Contracts",
+			"item": [
+				{
+					"name": "Get supervisor contracts",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{core_api}}/v1/supervisor-contracts?page_size=50",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"supervisor-contracts"
+							],
+							"query": [
+								{
+									"key": "page_size",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create supervisor contract",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"request_id\": \"{{$guid}}\",\r\n    \"supervisor_contract\": {\r\n        \"id\": \"deposit_portfolio\",\r\n        \"display_name\": \"Minimal Supervisor Contract\"\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/supervisor-contracts",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"supervisor-contracts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get supervisor contract versions",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{core_api}}/v1/supervisor-contract-versions?page_size=50&supervisor_contract_id=wick_murabaha_supervisor_contract",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"supervisor-contract-versions"
+							],
+							"query": [
+								{
+									"key": "page_size",
+									"value": "50"
+								},
+								{
+									"key": "supervisor_contract_id",
+									"value": "wick_murabaha_supervisor_contract"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create supervisor contract version",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// The Supervisor Contract code.\r",
+									"api = '3.9.0'\r",
+									"version = '0.0.2'\r",
+									"code = `\r",
+									"api = '${api}'\r",
+									"version = '${version}'\r",
+									"_DENOMINATION = 'GBP'\r",
+									"\r",
+									"supervised_smart_contracts = [\r",
+									"    SmartContractDescriptor(\r",
+									"        alias='deposit_account',\r",
+									"        smart_contract_version_id='89',\r",
+									"    )\r",
+									"]\r",
+									"`\r",
+									"pm.environment.set('code', JSON.stringify(code))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n      \"request_id\": \"{{$guid}}\",\r\n      \"supervisor_contract_version\": {\r\n        \"supervisor_contract_id\": \"{{supervisor_contract_id}}\",\r\n        \"display_name\": \"Minimal Supervisor Contract\",\r\n        \"description\": \"Minimal Supervisor Contract\",\r\n        \"code\": {{code}}\r\n      }\r\n    }"
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/supervisor-contract-versions",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"supervisor-contract-versions"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Internal Account",
+			"item": [
+				{
+					"name": "Create Internal account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n      \"internal_account\": {\n        \"id\": \"{{$guid}}\",\n        \"product_id\": \"InternalAccount\",\n        \"permitted_denominations\": [\n          \"GBP\"\n        ],\n        \"details\": {},\n        \"accounting\": {\n          \"tside\": \"TSIDE_ASSET\"\n        }\n      },\n      \"request_id\": \"value1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/internal-accounts",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"internal-accounts"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Restriction",
+			"item": [
+				{
+					"name": "Create Restriction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"restriction_set\": {\n       \"restriction_set_definition_id\": \"RESTRICTION_SET_DEFINITION_BLOCKED_ESCALATED_ACCOUNT\",\n       \"account_id\": \"9504b619-79c4-4e65-f063-a43d7f2f6c33\"\n    },\n    \"request_id\": \"{{$guid}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/restriction-sets",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"restriction-sets"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Flags",
+			"item": [
+				{
+					"name": "Create Flag",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"flag\": {\n       \"flag_definition_id\": \"BLOCK_DIRECT_DEBIT\",\n       \"description\":\"temp offboarding\",\n       \"account_id\": \"9504b619-79c4-4e65-f063-a43d7f2f6c33\"\n    },\n    \"request_id\": \"{{$guid}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{core_api}}/v1/flags",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"flags"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Balance",
+			"item": [
+				{
+					"name": "Get Live Balance",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{core_api}}/v1/balances/live?account_ids=b93727c2-aba1-98c1-df2a-5e952b06a58f&account_addresses=DEFAULT&page_size=100",
+							"host": [
+								"{{core_api}}"
+							],
+							"path": [
+								"v1",
+								"balances",
+								"live"
+							],
+							"query": [
+								{
+									"key": "account_ids",
+									"value": "b93727c2-aba1-98c1-df2a-5e952b06a58f"
+								},
+								{
+									"key": "account_addresses",
+									"value": "DEFAULT"
+								},
+								{
+									"key": "page_size",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "core_api",
+			"value": "https://core-api.partner-eph-6.tmachine.io"
+		},
+		{
+			"key": "token",
+			"value": "A0006786022557907328897!rI1MCYa35TdEFt3kka7xh5edAoXEHfXGzntcA4vSxAseR+Cu+rseyz+j9Ql4WffZD8IsAZ9DUKDttPlqvSNsrfZd6To="
+		},
+		{
+			"key": "customer_id",
+			"value": "7377099312150540399"
+		}
+	]
+}
