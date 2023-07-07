@@ -19,6 +19,7 @@ PIB_REQUEST_TOPIC = 'vault.core.postings.requests.v1'
 # PRODUCT_VERSION_CREATED_TOPIC = 'vault.api.v1.products.product_version.created'
 # POSTING_CLIENT_API_RESPONSE_TOPIC = "vault.core.postings.async_creation_api.responses"
 
+
 def main():
     # connect to DB
     db = connect_to_mongo_db()
@@ -45,10 +46,11 @@ def main():
             #                                              record.value))
             record_consumed = json.loads(msg.value)
             # print(json.dumps(record_consumed, indent=1))
-            insert_into_mongo_db(db,record_consumed)
+            insert_into_mongo_db(db, record_consumed)
 
     except:
         print("Could not insert into MongoDB")
+
 
 def connect_to_mongo_db():
     # Connect to MongoDB and vault_customer database
@@ -62,7 +64,7 @@ def connect_to_mongo_db():
     return db
 
 
-def insert_into_mongo_db(db,record_consumed):
+def insert_into_mongo_db(db, record_consumed):
     try:
         db.postings_requests.insert_one(record_consumed)
     except:
