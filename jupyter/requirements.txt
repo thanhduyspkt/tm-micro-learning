@@ -1,0 +1,14 @@
+confluent_kafka==1.7.0
+coverage==5.5
+Deprecated==1.2.10
+jsonpath_ng==1.5.2
+pytest==6.2.4
+pytest-xdist==2.3.0
+python_dateutil==2.8.1
+pytz==2018.3
+PyYAML==5.4.1
+requests==2.18.4
+parameterized==0.8.1
+kafka-python==2.0.2
+python-snappy
+pymongo
