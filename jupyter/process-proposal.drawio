@@ -1,0 +1,236 @@
+<mxfile host="65bd71144e">
+    <diagram id="eZoFI8GGpEovhwvC60ZW" name="Page-1">
+        <mxGraphModel dx="1835" dy="954" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" background="#ffffff" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" style="edgeStyle=none;html=1;" parent="1" source="3" target="5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="PM prepares PRD&lt;br&gt;with high level goals, scopes&amp;nbsp;&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-757" y="-113" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="" style="edgeStyle=none;html=1;" parent="1" source="5" target="10" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="CTO, Head, and other relevant stakeholders review PRD" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="-560" y="-113" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" style="edgeStyle=none;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="10" target="3" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-488" y="-219.5" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="-266" y="-225"/>
+                            <mxPoint x="-700" y="-223"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="7" value="NO" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="6" vertex="1" connectable="0">
+                    <mxGeometry x="-0.4273" y="-1" relative="1" as="geometry">
+                        <mxPoint x="-144" y="-6" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="8" value="" style="edgeStyle=none;html=1;" parent="1" source="10" target="12" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="YES" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="8" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" y="-2" relative="1" as="geometry">
+                        <mxPoint x="-1" y="-12" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="10" value="PRD is aproved?" style="rhombus;whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="-306" y="-123" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="" style="edgeStyle=none;html=1;" parent="1" source="12" target="14" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="EM and development team create TRD" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="-166" y="-113" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="14" target="19" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="TRD is reviewed by Head, CTO, and other technical leaders" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="-165" y="27" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="19" target="12" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-1" y="-19.5" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="56" y="193"/>
+                            <mxPoint x="56" y="-83"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="16" value="NO" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="15" vertex="1" connectable="0">
+                    <mxGeometry x="-0.8116" y="2" relative="1" as="geometry">
+                        <mxPoint x="-12" y="-4" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="17" value="" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="19" target="22" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-205" y="193" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="18" value="YES" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="17" vertex="1" connectable="0">
+                    <mxGeometry x="-0.3" y="3" relative="1" as="geometry">
+                        <mxPoint x="-2" y="-13" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="19" value="TRD is approved?" style="rhombus;whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="-145" y="153" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="Any concerns about the architecture should be resolved&amp;nbsp;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="-28" y="-134" width="188" height="61" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="" style="edgeStyle=none;html=1;" parent="1" source="22" target="31" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="DoR checklist" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-438" y="75.25" width="200" height="235.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="PRD is approved" style="whiteSpace=wrap;html=1;rounded=0;" parent="22" vertex="1">
+                    <mxGeometry x="38" y="34" width="120" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="TRD is approved" style="whiteSpace=wrap;html=1;rounded=0;" parent="22" vertex="1">
+                    <mxGeometry x="38" y="74" width="120" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="All stakeholders are aligned on the goals" style="whiteSpace=wrap;html=1;rounded=0;" parent="22" vertex="1">
+                    <mxGeometry x="38" y="114" width="120" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="Acceptance criteria are clear and agreed upon the team&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=0;" parent="22" vertex="1">
+                    <mxGeometry x="40" y="162" width="120" height="49" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="" style="edgeStyle=none;html=1;" parent="1" source="31" target="33" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" value="NO" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="27" vertex="1" connectable="0">
+                    <mxGeometry x="-0.3222" y="-2" relative="1" as="geometry">
+                        <mxPoint y="1" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="29" value="" style="edgeStyle=none;html=1;" parent="1" source="31" target="35" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="YES" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="29" vertex="1" connectable="0">
+                    <mxGeometry x="-0.5667" y="-3" relative="1" as="geometry">
+                        <mxPoint x="-10" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="31" value="DoR is met?" style="rhombus;whiteSpace=wrap;html=1;fontStyle=0;startSize=23;" parent="1" vertex="1">
+                    <mxGeometry x="-658" y="153" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="33" target="22" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="-338" y="8"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="33" value="Fix the missing points defined in DoR checklist" style="whiteSpace=wrap;html=1;fontStyle=0;startSize=23;" parent="1" vertex="1">
+                    <mxGeometry x="-678" y="-20" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" value="" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="35" target="39" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-778" y="277" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="35" value="Add the User Story to development team product backlog" style="whiteSpace=wrap;html=1;fontStyle=0;startSize=23;" parent="1" vertex="1">
+                    <mxGeometry x="-838" y="163" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="36" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="37" target="3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="37" value="" style="ellipse;shape=doubleEllipse;html=1;dashed=0;whitespace=wrap;aspect=fixed;" parent="1" vertex="1">
+                    <mxGeometry x="-907" y="-113" width="60" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" style="edgeStyle=none;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="39" target="47" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-437" y="436" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="39" value="Refinement" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-1037.12" y="310.75" width="518.25" height="250" as="geometry"/>
+                </mxCell>
+                <mxCell id="40" value="Split the User Story to smaller, manageable&amp;nbsp;technical tasks" style="rounded=0;whiteSpace=wrap;html=1;" parent="39" vertex="1">
+                    <mxGeometry x="172.5" y="29" width="185.5" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="41" value="All the tasks have to have the estimation&lt;br&gt;Consider factors like complexity, potential risks, and the team's familiarity with the technology." style="rounded=0;whiteSpace=wrap;html=1;" parent="39" vertex="1">
+                    <mxGeometry x="20.5" y="95" width="265.5" height="58" as="geometry"/>
+                </mxCell>
+                <mxCell id="42" value="QAs have to define all test cases to fulfill the acceptance criteria" style="rounded=0;whiteSpace=wrap;html=1;" parent="39" vertex="1">
+                    <mxGeometry x="376.25" y="29" width="121.5" height="56" as="geometry"/>
+                </mxCell>
+                <mxCell id="43" value="The estimation must include both DEV and QA efforts" style="rounded=0;whiteSpace=wrap;html=1;" parent="39" vertex="1">
+                    <mxGeometry x="302.25" y="95" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="44" value="Identify all dependencies that could impact the progress of the development tasks, including both internal and external factors." style="rounded=0;whiteSpace=wrap;html=1;" parent="39" vertex="1">
+                    <mxGeometry x="32.5" y="176" width="285.5" height="53" as="geometry"/>
+                </mxCell>
+                <mxCell id="45" value="Discuss each user story in detail, ensure it's clear and unambiguous." style="rounded=0;whiteSpace=wrap;html=1;" parent="39" vertex="1">
+                    <mxGeometry x="20.5" y="29" width="133.5" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="46" value="" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="47" target="57" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="47" value="Development" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-448" y="389.5" width="376" height="171.25" as="geometry"/>
+                </mxCell>
+                <mxCell id="48" value="Coding" style="rounded=0;whiteSpace=wrap;html=1;" parent="47" vertex="1">
+                    <mxGeometry x="17" y="54.75" width="105" height="37.25" as="geometry"/>
+                </mxCell>
+                <mxCell id="49" value="Testing" style="rounded=0;whiteSpace=wrap;html=1;" parent="47" vertex="1">
+                    <mxGeometry x="137" y="54.75" width="105" height="37.25" as="geometry"/>
+                </mxCell>
+                <mxCell id="50" value="Code Review" style="rounded=0;whiteSpace=wrap;html=1;" parent="47" vertex="1">
+                    <mxGeometry x="257" y="54.75" width="105" height="37.25" as="geometry"/>
+                </mxCell>
+                <mxCell id="51" value="DSU" style="rounded=0;whiteSpace=wrap;html=1;" parent="47" vertex="1">
+                    <mxGeometry x="17" y="109.25" width="105" height="37.25" as="geometry"/>
+                </mxCell>
+                <mxCell id="52" value="Demo" style="rounded=0;whiteSpace=wrap;html=1;" parent="47" vertex="1">
+                    <mxGeometry x="137" y="109.25" width="105" height="37.25" as="geometry"/>
+                </mxCell>
+                <mxCell id="53" value="Build monitoring" style="rounded=0;whiteSpace=wrap;html=1;" parent="47" vertex="1">
+                    <mxGeometry x="257" y="109.25" width="105" height="37.25" as="geometry"/>
+                </mxCell>
+                <mxCell id="54" value="" style="edgeStyle=none;html=1;" parent="1" source="55" target="62" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="55" value="Pre-Deployment review by EM, CTO, or Head" style="whiteSpace=wrap;html=1;fontStyle=0;startSize=23;" parent="1" vertex="1">
+                    <mxGeometry x="250" y="450.005" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="67" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="57" target="55">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="57" value="DoD checklist" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-24" y="356.01" width="229" height="248" as="geometry"/>
+                </mxCell>
+                <mxCell id="58" value="&lt;meta charset=&quot;utf-8&quot;&gt;Ensure all acceptance criteria have been met." style="whiteSpace=wrap;html=1;" parent="57" vertex="1">
+                    <mxGeometry x="13" y="38" width="202" height="48" as="geometry"/>
+                </mxCell>
+                <mxCell id="59" value="Confirm that the feature or product has the UAT testing sign-off" style="whiteSpace=wrap;html=1;" parent="57" vertex="1">
+                    <mxGeometry x="13" y="98" width="202" height="59" as="geometry"/>
+                </mxCell>
+                <mxCell id="60" value="Gather feedback from stakeholders and end-users to ensure satisfaction" style="whiteSpace=wrap;html=1;" parent="57" vertex="1">
+                    <mxGeometry x="13" y="169" width="200" height="61" as="geometry"/>
+                </mxCell>
+                <mxCell id="61" value="" style="edgeStyle=none;html=1;" parent="1" source="62" target="64" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="62" value="Deploy" style="whiteSpace=wrap;html=1;fontStyle=0;startSize=23;" parent="1" vertex="1">
+                    <mxGeometry x="250" y="619.995" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="66" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="64" target="65">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="64" value="Post-Deployment Monitoring" style="whiteSpace=wrap;html=1;fontStyle=0;startSize=23;" parent="1" vertex="1">
+                    <mxGeometry x="250" y="746.995" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="65" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#ff0000;" parent="1" vertex="1">
+                    <mxGeometry x="139" y="761.99" width="30" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
