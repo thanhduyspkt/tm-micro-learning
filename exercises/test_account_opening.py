@@ -963,3 +963,36 @@ class TestTMAccountOpening(unittest.TestCase):
         rejected_deactivation_hook_events = [m for m in messages if m.get('account_update_updated') is not None and m['account_update_updated']['account_update']['status'] == 'ACCOUNT_UPDATE_STATUS_REJECTED' and m['account_update_updated']['account_update'].get('closure_update') is not None]
         self.assertEqual(1, len(rejected_deactivation_hook_events))
 
+    # account is active
+    # cannot directly the account
+    # get error code 400, msg: {"violation_type":"BLOCKED_BY_ACCOUNT_STATUS","metadata":{"account.status":"ACCOUNT_STATUS_OPEN"}
+    def test_directly_close_open_account(self):
+        current_time = datetime.datetime.utcnow()
+        opening_timestamp = current_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        response = create_account({
+            'request_id': str(uuid.uuid4()),
+            "account": {
+                "product_version_id": "708",
+                "stakeholder_ids": [
+                    self.customer_id
+                ],
+                "instance_param_vals": {
+                    "internal_account": self.internal_account_id,
+                    "opening_bonus": "20.0",
+                    "interest_rate": "0.05",
+                    "monthly_withdrawal_fee": "1",
+                    "minimum_monthly_withdrawal": "0"
+                },
+                "details": {},
+                "status": "ACCOUNT_STATUS_OPEN",
+                "opening_timestamp": opening_timestamp,
+            }
+        })
+        self.assertEqual(200, response.status_code)
+        account_id = response.json()['id']
+        time.sleep(3)
+        response = close_account(account_id, str(uuid.uuid4()))
+        self.assertEqual(400, response.status_code)
+
+
+

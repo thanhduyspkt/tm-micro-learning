@@ -142,7 +142,7 @@ def pending_closure_account(account_id, request_id):
     return response
 
 def close_account(account_id, request_id):
-    return requests.put(
+    response = requests.put(
         url=f"{TM_CORE_URL}/v1/accounts/{account_id}",
         headers={
             'X-Auth-Token': TM_TOKEN,
@@ -160,6 +160,8 @@ def close_account(account_id, request_id):
             }
         },
     )
+    print(response.content)
+    return response
 
 def create_account(account_info):
     print(f"BEGIN - {TM_CORE_URL}/v1/accounts")
