@@ -994,5 +994,48 @@ class TestTMAccountOpening(unittest.TestCase):
         response = close_account(account_id, str(uuid.uuid4()))
         self.assertEqual(400, response.status_code)
 
+    # account status OPEN -> PENDING CLOSURE -> CLOSED
+    # all schedules are disabled
+    def test_close_account_with_schedules(self):
+        current_time = datetime.datetime.utcnow()
+        opening_timestamp = current_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        response = create_account({
+            'request_id': str(uuid.uuid4()),
+            "account": {
+                "product_version_id": "708",
+                "stakeholder_ids": [
+                    self.customer_id
+                ],
+                "instance_param_vals": {
+                    "internal_account": self.internal_account_id,
+                    "opening_bonus": "20.0",
+                    "interest_rate": "0.05",
+                    "monthly_withdrawal_fee": "1",
+                    "minimum_monthly_withdrawal": "0"
+                },
+                "details": {},
+                "status": "ACCOUNT_STATUS_OPEN",
+                "opening_timestamp": opening_timestamp,
+            }
+        })
+        self.assertEqual(200, response.status_code)
+        account_id = response.json()['id']
+
+        # wait for the account to be active
+        time.sleep(3)
+
+        response = pending_closure_account(account_id, str(uuid.uuid4()))
+        self.assertEqual(200, response.status_code)
+
+        close_account(account_id, str(uuid.uuid4()))
+        self.assertEqual(200, response.status_code)
+        time.sleep(3)
+
+        # query schedule for this account, they're still enabled for sure
+        print(f"check schedules of the account {account_id}")
+        schedule_status = get_schedules_status(account_id)
+        disable_schedules = [k for k, v in schedule_status.items() if v == 'SCHEDULE_STATUS_DISABLED']
+        self.assertEqual(3, len(disable_schedules), "should have no enabled schedule")
+
 
 
