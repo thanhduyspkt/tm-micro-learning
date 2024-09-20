@@ -1,0 +1,16 @@
+import os
+from dotenv import load_dotenv, dotenv_values
+
+dotenv_file = ".env"
+load_dotenv(dotenv_file)
+
+TM_KAFKA_URL = os.getenv('TM_KAKFA_URL')
+TM_KAFKA_PROTOCOL = os.getenv('TM_KAFKA_PROTOCOL')
+TM_KAFKA_SASL_MECHANISM = os.getenv('TM_KAFKA_SASL_MECHANISM')
+TM_KAFKA_SASL_PLAIN_USERNAME = os.getenv('TM_KAFKA_SASL_PLAIN_USERNAME')
+TM_KAFKA_SASL_PLAIN_PASSWORD = os.getenv('TM_KAFKA_SASL_PLAIN_PASSWORD')
+TM_CORE_URL = os.getenv('TM_CORE_URL')
+POSTING_CLIENT_ID = os.getenv('POSTING_CLIENT_ID')
+TM_TOKEN = os.getenv('TM_TOKEN')
+POSTING_RESPONSE_TOPIC = os.getenv('POSTING_RESPONSE_TOPIC')
+POSTING_CREATED_TOPIC = os.getenv('POSTING_CREATED_TOPIC')
