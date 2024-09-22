@@ -3,6 +3,7 @@ import json
 import time
 import unittest
 import uuid
+from datetime import timedelta
 
 from environment import POSTING_CLIENT_ID, POSTING_RESPONSE_TOPIC, POSTING_CREATED_TOPIC
 from kafka_kk import KafkaUtils
@@ -964,7 +965,7 @@ class TestTMAccountOpening(unittest.TestCase):
         self.assertEqual(1, len(rejected_deactivation_hook_events))
 
     # account is active
-    # cannot directly the account
+    # cannot directly close the account
     # get error code 400, msg: {"violation_type":"BLOCKED_BY_ACCOUNT_STATUS","metadata":{"account.status":"ACCOUNT_STATUS_OPEN"}
     def test_directly_close_open_account(self):
         current_time = datetime.datetime.utcnow()
@@ -1037,5 +1038,188 @@ class TestTMAccountOpening(unittest.TestCase):
         disable_schedules = [k for k, v in schedule_status.items() if v == 'SCHEDULE_STATUS_DISABLED']
         self.assertEqual(3, len(disable_schedules), "should have no enabled schedule")
 
+    # update status from OPEN -> PENDING CLOSURE
+    # still able to submit posting
+    # the posting is accepted
+    def test_send_pib_to_pending_closure_account(self):
+        current_time = datetime.datetime.utcnow()
+        opening_timestamp = current_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        response = create_account({
+            'request_id': str(uuid.uuid4()),
+            "account": {
+                "product_id": self.product_id,
+                "stakeholder_ids": [
+                    self.customer_id
+                ],
+                "instance_param_vals": {
+                    "internal_account": self.internal_account_id,
+                    "opening_bonus": "20.0",
+                    "interest_rate": "0.05",
+                    "monthly_withdrawal_fee": "1",
+                    "minimum_monthly_withdrawal": "0"
+                },
+                "details": {},
+                "status": "ACCOUNT_STATUS_OPEN",
+                "opening_timestamp": opening_timestamp,
+            }
+        })
+        self.assertEqual(200, response.status_code)
+        time.sleep(3)
+        account_id = response.json()['id']
+        response = pending_closure_account(account_id, str(uuid.uuid4()))
+        self.assertEqual(200, response.status_code)
+        time.sleep(3)
+        kafka_utils = KafkaUtils(None, 10)
+        kafka_utils.start_consuming_messages_from_topics([POSTING_RESPONSE_TOPIC, POSTING_CREATED_TOPIC], None)
+        request_id = str(uuid.uuid4())
+        response = create_pib_async({
+            'request_id': f"{request_id}_2",
+            'posting_instruction_batch': {
+                'client_batch_id': f"{request_id}_2",
+                'client_id': POSTING_CLIENT_ID,
+                'posting_instructions': [
+                    {
+                        'client_transaction_id': f"{request_id}_2",
+                        'inbound_hard_settlement': {
+                            "amount": "1",
+                            "denomination": "USD",
+                            "target_account": {
+                                "account_id": account_id
+                            },
+                            "internal_account_id": self.internal_account_id,
+                        },
+                        "instruction_details": {}
+                    }
+                ]
+            }
+        })
+        self.assertEqual(200, response.status_code)
+        message_map = kafka_utils.get_messages_map()
+        messages = [m for m in message_map[POSTING_CREATED_TOPIC] if m['posting_instruction_batch']['client_batch_id'] == f"{request_id}_2"]
+        self.assertEqual(1, len(messages))
+        self.assertEqual('POSTING_INSTRUCTION_BATCH_STATUS_ACCEPTED', messages[0]['posting_instruction_batch']['status'])
 
+    # Once status is CLOSED
+    # the account does not accept any postings
+    # even we can use core API to submit a posting, but this posting will not be created
+    def test_send_postings_with_close_account(self):
+        current_time = datetime.datetime.utcnow()
+        opening_timestamp = current_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        response = create_account({
+            'request_id': str(uuid.uuid4()),
+            "account": {
+                "product_version_id": "708",
+                "stakeholder_ids": [
+                    self.customer_id
+                ],
+                "instance_param_vals": {
+                    "internal_account": self.internal_account_id,
+                    "opening_bonus": "20.0",
+                    "interest_rate": "0.05",
+                    "monthly_withdrawal_fee": "1",
+                    "minimum_monthly_withdrawal": "0"
+                },
+                "details": {},
+                "status": "ACCOUNT_STATUS_OPEN",
+                "opening_timestamp": opening_timestamp,
+            }
+        })
+        self.assertEqual(200, response.status_code)
+        account_id = response.json()['id']
+
+        # wait for the account to be active
+        time.sleep(3)
+
+        response = pending_closure_account(account_id, str(uuid.uuid4()))
+        self.assertEqual(200, response.status_code)
+
+        close_account(account_id, str(uuid.uuid4()))
+        self.assertEqual(200, response.status_code)
+        time.sleep(3)
+
+        request_id = str(uuid.uuid4())
+        kafka_utils = KafkaUtils(None, 10)
+        kafka_utils.start_consuming_messages_from_topics([POSTING_CREATED_TOPIC], None)
+        response = create_pib_async({
+            'request_id': f"{request_id}_2",
+            'posting_instruction_batch': {
+                'client_batch_id': f"{request_id}_2",
+                'client_id': POSTING_CLIENT_ID,
+                'posting_instructions': [
+                    {
+                        'client_transaction_id': f"{request_id}_2",
+                        'inbound_hard_settlement': {
+                            "amount": "1",
+                            "denomination": "USD",
+                            "target_account": {
+                                "account_id": account_id
+                            },
+                            "internal_account_id": self.internal_account_id,
+                        },
+                        "instruction_details": {}
+                    }
+                ]
+            }
+        })
+        self.assertEqual(200, response.status_code)
+        message_map = kafka_utils.get_messages_map()
+        messages = message_map[POSTING_CREATED_TOPIC]
+        my_postings = [m for m in messages if m['posting_instruction_batch']['client_batch_id'] == f"{request_id}_2"]
+        self.assertEqual(0, len(my_postings))
+
+    # can open an account with opening_timestamp from the past
+    # schedules will be compensated X times = now - opening_timestamp
+    # ex: opening_timestamp = 3 days ago, then schedule of daily interest will be triggered 3 times
+    def test_open_account_with_the_past_opening_timestamp(self):
+        current_time = datetime.datetime.utcnow() - timedelta(days=2)
+        opening_timestamp = current_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        response = create_account({
+            'request_id': str(uuid.uuid4()),
+            "account": {
+                "product_id": self.product_id,
+                "stakeholder_ids": [
+                    self.customer_id
+                ],
+                "instance_param_vals": {
+                    "internal_account": self.internal_account_id,
+                    "opening_bonus": "20.0",
+                    "interest_rate": "0.05",
+                    "monthly_withdrawal_fee": "1",
+                    "minimum_monthly_withdrawal": "0"
+                },
+                "details": {},
+                "status": "ACCOUNT_STATUS_OPEN",
+                "opening_timestamp": opening_timestamp,
+            }
+        })
+        self.assertEqual(200, response.status_code)
+        account_id = response.json()['id']
+        time.sleep(60)
+        postings = fetch_posting_instruction(None, account_id, 10)
+        self.assertEqual(3, len(postings['posting_instruction_batches']))
+
+    # cannot open an account with the future opening_timestamp
+    def test_open_account_with_future_timestamp(self):
+        current_time = datetime.datetime.utcnow() + timedelta(days=2)
+        opening_timestamp = current_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        response = create_account({
+            'request_id': str(uuid.uuid4()),
+            "account": {
+                "product_id": self.product_id,
+                "stakeholder_ids": [
+                    self.customer_id
+                ],
+                "instance_param_vals": {
+                    "internal_account": self.internal_account_id,
+                    "opening_bonus": "20.0",
+                    "interest_rate": "0.05",
+                    "monthly_withdrawal_fee": "1",
+                    "minimum_monthly_withdrawal": "0"
+                },
+                "details": {},
+                "status": "ACCOUNT_STATUS_OPEN",
+                "opening_timestamp": opening_timestamp,
+            }
+        })
+        self.assertEqual(400, response.status_code)
 

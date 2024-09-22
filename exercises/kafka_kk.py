@@ -27,6 +27,8 @@ api_version = (0, 8, 2)
 #     # 'sasl.password': TM_KAFKA_SASL_PLAIN_PASSWORD,
 # }
 
+group_id = 'kaka_group_13'
+
 def produce_messages(topic, messages):
     producer = KafkaProducer(
         bootstrap_servers=[TM_KAFKA_URL],
@@ -50,7 +52,7 @@ def consumer_messages(topic, filter_func, consolidate_func, consuming_time = 30)
         security_protocol=TM_KAFKA_PROTOCOL,
         auto_offset_reset='latest',  # Start reading from the latest message
         enable_auto_commit=True,  # Auto-commit the offsets
-        group_id='your_group_id',  # Replace with your consumer group ID,
+        group_id=group_id,  # Replace with your consumer group ID,
         value_deserializer=lambda x: x.decode('utf-8')
     )
 
@@ -101,7 +103,7 @@ class KafkaUtils:
             security_protocol=TM_KAFKA_PROTOCOL,
             auto_offset_reset='latest',  # Start reading from the latest message
             enable_auto_commit=True,  # Auto-commit the offsets
-            group_id='testing-12',  # Replace with your consumer group ID,
+            group_id=group_id,  # Replace with your consumer group ID,
             value_deserializer=lambda x: x.decode('utf-8')
         )
 
@@ -142,7 +144,7 @@ class KafkaUtils:
             security_protocol=TM_KAFKA_PROTOCOL,
             auto_offset_reset='latest',  # Start reading from the latest message
             enable_auto_commit=True,  # Auto-commit the offsets
-            group_id='testing-12',  # Replace with your consumer group ID,
+            group_id=group_id,  # Replace with your consumer group ID,
             value_deserializer=lambda x: x.decode('utf-8')
         )
 
