@@ -1,8 +1,10 @@
+import time
 import unittest
 import uuid
 
-from core_api import create_customer, create_account, create_pib_async
-from environment import POSTING_CLIENT_ID
+from core_api import create_customer, create_account, create_pib_async, fetch_posting_instruction
+from environment import POSTING_CLIENT_ID, PIB_STATUS_ACCEPTED
+from kafka_api import create_pib_kafka_async
 
 
 class TestPostings(unittest.TestCase):
@@ -125,6 +127,10 @@ class TestPostings(unittest.TestCase):
             }
         })
         self.assertEqual(200, response.status_code)
+        time.sleep(3)
+        postings_result = fetch_posting_instruction(client_batch_id=f"{client_batch_id}_1", account_id=self.account_id)
+        self.assertEqual(1, len(postings_result['posting_instruction_batches']))
+        self.assertEqual(PIB_STATUS_ACCEPTED, postings_result['posting_instruction_batches'][0]['status'])
 
     # 'api_type': 'POSTINGS_API_TYPE_HIGH_PRIORITY'
     def test_create_posting_with_high_priority(self):
@@ -153,3 +159,38 @@ class TestPostings(unittest.TestCase):
             }
         })
         self.assertEqual(200, response.status_code)
+        time.sleep(3)
+        postings_result = fetch_posting_instruction(client_batch_id=f"{client_batch_id}_1", account_id=self.account_id)
+        self.assertEqual(1, len(postings_result['posting_instruction_batches']))
+        self.assertEqual(PIB_STATUS_ACCEPTED, postings_result['posting_instruction_batches'][0]['status'])
+
+    # topic: vault.core.postings.requests.low_priority.v1
+    # note: the client id must have register response_topic_low_priority
+    def test_create_posting_via_kafka_with_low_priority(self):
+        request_id = str(uuid.uuid4())
+        client_batch_id = str(uuid.uuid4())
+        create_pib_kafka_async({
+            'request_id': request_id,
+            'posting_instruction_batch': {
+                'client_batch_id': f"{client_batch_id}_1",
+                'client_id': 'deposits-core-kk',
+                'posting_instructions': [
+                    {
+                        'client_transaction_id': str(uuid.uuid4()),
+                        'outbound_authorisation': {
+                            "amount": "3",
+                            "denomination": "USD",
+                            "target_account": {
+                                "account_id": self.account_id
+                            },
+                            "internal_account_id": self.internal_account_id,
+                        },
+                        "instruction_details": {}
+                    }
+                ]
+            }
+        }, low_priority=True)
+        time.sleep(3)
+        postings_result = fetch_posting_instruction(client_batch_id=f"{client_batch_id}_1", account_id=self.account_id)
+        self.assertEqual(1, len(postings_result['posting_instruction_batches']))
+        self.assertEqual(PIB_STATUS_ACCEPTED, postings_result['posting_instruction_batches'][0]['status'])
