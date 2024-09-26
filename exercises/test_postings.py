@@ -194,3 +194,89 @@ class TestPostings(unittest.TestCase):
         postings_result = fetch_posting_instruction(client_batch_id=f"{client_batch_id}_1", account_id=self.account_id)
         self.assertEqual(1, len(postings_result['posting_instruction_batches']))
         self.assertEqual(PIB_STATUS_ACCEPTED, postings_result['posting_instruction_batches'][0]['status'])
+
+    # topic: vault.core.postings.requests.v1
+    def test_create_posting_via_kafka_with_high_priority(self):
+        request_id = str(uuid.uuid4())
+        client_batch_id = str(uuid.uuid4())
+        create_pib_kafka_async({
+            'request_id': request_id,
+            'posting_instruction_batch': {
+                'client_batch_id': f"{client_batch_id}_1",
+                'client_id': 'deposits-core-kk',
+                'posting_instructions': [
+                    {
+                        'client_transaction_id': str(uuid.uuid4()),
+                        'outbound_authorisation': {
+                            "amount": "3",
+                            "denomination": "USD",
+                            "target_account": {
+                                "account_id": self.account_id
+                            },
+                            "internal_account_id": self.internal_account_id,
+                        },
+                        "instruction_details": {}
+                    }
+                ]
+            }
+        })
+        time.sleep(3)
+        postings_result = fetch_posting_instruction(client_batch_id=f"{client_batch_id}_1", account_id=self.account_id)
+        self.assertEqual(1, len(postings_result['posting_instruction_batches']))
+        self.assertEqual(PIB_STATUS_ACCEPTED, postings_result['posting_instruction_batches'][0]['status'])
+
+    # supported_denomination=[USD]
+    # send posting denomination SGD
+    # there's no pre posting code hook to validate denomination
+    # TM will accept this posting
+    def test_create_posting_with_no_pre_posting_hook(self):
+        response = create_account({
+            'request_id': str(uuid.uuid4()),
+            "account": {
+                "product_version_id": '709',
+                "stakeholder_ids": [
+                    self.customer_id
+                ],
+                "instance_param_vals": {
+                    "internal_account": self.internal_account_id,
+                    "opening_bonus": "20.0",
+                    "interest_rate": "0.05",
+                    "monthly_withdrawal_fee": "1",
+                    "minimum_monthly_withdrawal": "0"
+                },
+                "details": {},
+                "status": "ACCOUNT_STATUS_OPEN"
+            }
+        })
+
+        self.assertEqual(200, response.status_code)
+        account_id = response.json()['id']
+
+        request_id = str(uuid.uuid4())
+        client_batch_id = str(uuid.uuid4())
+        response = create_pib_async({
+            'request_id': request_id,
+            'posting_instruction_batch': {
+                'client_batch_id': f"{client_batch_id}_1",
+                'client_id': 'deposits-core-kk',
+                'posting_instructions': [
+                    {
+                        'client_transaction_id': str(uuid.uuid4()),
+                        'outbound_authorisation': {
+                            "amount": "3",
+                            "denomination": "SGD",
+                            "target_account": {
+                                "account_id": account_id
+                            },
+                            "internal_account_id": self.internal_account_id,
+                        },
+                        "instruction_details": {}
+                    }
+                ]
+            }
+        })
+        self.assertEqual(200, response.status_code)
+        time.sleep(3)
+        postings_result = fetch_posting_instruction(client_batch_id=f"{client_batch_id}_1", account_id=account_id)
+        self.assertEqual(1, len(postings_result['posting_instruction_batches']))
+        self.assertEqual(PIB_STATUS_ACCEPTED, postings_result['posting_instruction_batches'][0]['status'])
