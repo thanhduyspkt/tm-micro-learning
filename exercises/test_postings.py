@@ -3,8 +3,10 @@ import unittest
 import uuid
 
 from core_api import create_customer, create_account, create_pib_async, fetch_posting_instruction
-from environment import POSTING_CLIENT_ID, PIB_STATUS_ACCEPTED
+from environment import POSTING_CLIENT_ID, PIB_STATUS_ACCEPTED, PIB_STATUS_REJECTED, POSTING_CREATED_TOPIC, \
+    POSTING_RESPONSE_TOPIC
 from kafka_api import create_pib_kafka_async
+from kafka_kk import KafkaUtils
 
 
 class TestPostings(unittest.TestCase):
@@ -280,3 +282,67 @@ class TestPostings(unittest.TestCase):
         postings_result = fetch_posting_instruction(client_batch_id=f"{client_batch_id}_1", account_id=account_id)
         self.assertEqual(1, len(postings_result['posting_instruction_batches']))
         self.assertEqual(PIB_STATUS_ACCEPTED, postings_result['posting_instruction_batches'][0]['status'])
+
+    # raise error in pre_posting hook
+    # Rest Posting API returns status 200
+    # Fetch Posting response via Rest API -> status is REJECTED
+    # Consume event from posting created topic -> status is REJECTED
+    # No event from the response topic
+    def test_create_posting_with_insufficient_fund(self):
+        kafka_utils = KafkaUtils(None, 10)
+        kafka_utils.start_consuming_messages_from_topics([POSTING_CREATED_TOPIC, "integration.postings_api.deposits-core-kkk-high.response", "integration.postings_api.deposits-core-kkk-low.response"], None)
+        response = create_account({
+            'request_id': str(uuid.uuid4()),
+            "account": {
+                "product_version_id": '742',
+                "stakeholder_ids": [
+                    self.customer_id
+                ],
+                "instance_param_vals": {
+                    "internal_account": self.internal_account_id,
+                    "opening_bonus": "20.0",
+                    "interest_rate": "0.05",
+                    # "monthly_withdrawal_fee": "1",
+                    # "minimum_monthly_withdrawal": "0"
+                },
+                "details": {},
+                "status": "ACCOUNT_STATUS_OPEN"
+            }
+        })
+
+        self.assertEqual(200, response.status_code)
+        account_id = response.json()['id']
+
+        request_id = str(uuid.uuid4())
+        client_batch_id = str(uuid.uuid4())
+        response = create_pib_async({
+            'request_id': request_id,
+            'posting_instruction_batch': {
+                'client_batch_id': f"{client_batch_id}_1",
+                'client_id': "deposits-core-kkk",
+                'posting_instructions': [
+                    {
+                        'client_transaction_id': str(uuid.uuid4()),
+                        'outbound_authorisation': {
+                            "amount": "10",
+                            "denomination": "USD",
+                            "target_account": {
+                                "account_id": account_id
+                            },
+                            "internal_account_id": self.internal_account_id
+                        },
+                        "instruction_details": {}
+                    }
+                ]
+            }
+        })
+        self.assertEqual(200, response.status_code)
+        time.sleep(3)
+        postings_result = fetch_posting_instruction(client_batch_id=f"{client_batch_id}_1", account_id=account_id)
+        self.assertEqual(1, len(postings_result['posting_instruction_batches']))
+        self.assertEqual(PIB_STATUS_REJECTED, postings_result['posting_instruction_batches'][0]['status'])
+
+        # message_map = kafka_utils.get_messages_map()
+        response_messages = kafka_utils.get_messages_from_posting_created_topic(POSTING_CREATED_TOPIC, f"{client_batch_id}_1")
+        self.assertEqual(1, len(response_messages))
+        self.assertEqual(PIB_STATUS_REJECTED, response_messages[0]['posting_instruction_batch']['status'])

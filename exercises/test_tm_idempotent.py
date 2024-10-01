@@ -801,9 +801,9 @@ class TestTMIdempotent(unittest.TestCase):
         response = create_customer(first_customer_info)
         self.assertEqual(200, response.status_code, 'first request should be accepted')
 
-        request_id = str(uuid.uuid4())
+        request_id_new = str(uuid.uuid4())
         second_customer_info = {
-            'request_id': request_id,
+            'request_id': request_id_new,
             'customer': {
                 'id': customer_id,
                 "status": "CUSTOMER_STATUS_ACTIVE",
@@ -820,7 +820,7 @@ class TestTMIdempotent(unittest.TestCase):
             }
         }
         response = create_customer(second_customer_info)
-        self.assertNotEqual(200, response.status_code,
+        self.assertEqual(409, response.status_code,
                             'second request should be rejected, TM knows that customer ID already exists')
 
     # with different request_id

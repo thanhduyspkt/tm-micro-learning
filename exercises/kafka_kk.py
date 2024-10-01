@@ -27,7 +27,7 @@ api_version = (0, 8, 2)
 #     # 'sasl.password': TM_KAFKA_SASL_PLAIN_PASSWORD,
 # }
 
-group_id = 'kaka_group_13'
+group_id = 'kaka_group_134'
 
 def produce_messages(topic, messages):
     producer = KafkaProducer(
@@ -95,6 +95,11 @@ class KafkaUtils:
 
         print("--- END ---")
         return self.messages_map
+
+    def get_messages_from_posting_created_topic(self, topic, client_batch_id):
+        messages_map = self.get_messages_map()
+        return [x for x in messages_map[topic] if
+                             x['posting_instruction_batch']['client_batch_id'] == client_batch_id]
 
     def start_consuming_messages_from_topics(self, topics, filter_func):
         kafka_consumer = KafkaConsumer(
