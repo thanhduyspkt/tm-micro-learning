@@ -1,4 +1,5 @@
 import json
+import os
 import time
 import uuid
 from threading import Thread
@@ -6,6 +7,7 @@ from time import time_ns
 
 from environment import TM_KAFKA_URL, TM_KAFKA_PROTOCOL, TM_KAFKA_SASL_MECHANISM, TM_KAFKA_SASL_PLAIN_PASSWORD, TM_KAFKA_SASL_PLAIN_USERNAME
 from kafka import KafkaConsumer, KafkaProducer
+from jupyter.master_kafka_consumer_saves_to_mongodb import connect_to_mongo_db
 
 PIB_TOPIC = 'vault.api.v1.postings.posting_instruction_batch.created'
 PIB_REQUEST_TOPIC = 'vault.core.postings.requests.v1'
@@ -97,6 +99,16 @@ class KafkaUtils:
         return self.messages_map
 
     def get_messages_from_posting_created_topic(self, topic, client_batch_id):
+        if os.getenv('source_of_events') == 'mongodb':
+            query = {"posting_instruction_batch.client_batch_id": client_batch_id}
+            db = connect_to_mongo_db()
+            collection = db[topic]
+            results = []
+            documents = collection.find(query)
+            for doc in documents:
+                results.append(doc)
+            return results
+
         messages_map = self.get_messages_map()
         return [x for x in messages_map[topic] if
                              x['posting_instruction_batch']['client_batch_id'] == client_batch_id]

@@ -55,7 +55,7 @@ def main():
 
             'vault.core_api.v1.restrictions.restriction_set.events',
             'integration.postings_api.deposits-core-kkk-high.response',
-            'integration.postings_api.deposits-core-kkk-low.response'
+            'integration.postings_api.deposits-core-kkk-low.response',
             'vault.api.v1.postings.posting_instruction_batch.created',
             'vault.core.postings.requests.v1',
             'vault.core_api.v1.postings.enriched_posting_instruction_batch.events',
