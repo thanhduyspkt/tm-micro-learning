@@ -5,6 +5,18 @@ from symbol import parameters
 import requests
 from environment import TM_CORE_URL, TM_TOKEN
 
+
+def fetch_balances_live(account_id, address = 'DEFAULT', page_size=100):
+    response = requests.get(
+        url=f"{TM_CORE_URL}/v1/balances/live?account_ids={account_id}&account_addresses={address}&page_size={page_size}",
+        headers={
+            'X-Auth-Token': TM_TOKEN,
+            'Content-Type': 'application/json',
+        }
+    )
+    print(response.content)
+    return response
+
 def trigger_close_code_hooks(account_id, request_id):
     response = requests.post(
         url=f"{TM_CORE_URL}/v1/account-updates",

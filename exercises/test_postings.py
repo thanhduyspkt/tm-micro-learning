@@ -2,7 +2,7 @@ import time
 import unittest
 import uuid
 
-from core_api import create_customer, create_account, create_pib_async, fetch_posting_instruction
+from core_api import create_customer, create_account, create_pib_async, fetch_posting_instruction, fetch_balances_live
 from environment import POSTING_CLIENT_ID, PIB_STATUS_ACCEPTED, PIB_STATUS_REJECTED, POSTING_CREATED_TOPIC, \
     POSTING_RESPONSE_TOPIC
 from kafka_api import create_pib_kafka_async
@@ -346,3 +346,59 @@ class TestPostings(unittest.TestCase):
         response_messages = kafka_utils.get_messages_from_posting_created_topic(POSTING_CREATED_TOPIC, f"{client_batch_id}_1")
         self.assertEqual(1, len(response_messages))
         self.assertEqual(PIB_STATUS_REJECTED, response_messages[0]['posting_instruction_batch']['status'])
+
+    # credit 30 USD to main account
+    # 1% of credit amount (0.3 USD) will be sent to CASHBACK address
+    def test_create_posting_with_cashback(self):
+        response = create_account({
+            'request_id': str(uuid.uuid4()),
+            "account": {
+                "product_version_id": '743',
+                "stakeholder_ids": [
+                    self.customer_id
+                ],
+                "instance_param_vals": {
+                    "internal_account": self.internal_account_id,
+                    "opening_bonus": "20.0",
+                    "interest_rate": "0.05",
+                    # "monthly_withdrawal_fee": "1",
+                    # "minimum_monthly_withdrawal": "0"
+                },
+                "details": {},
+                "status": "ACCOUNT_STATUS_OPEN"
+            }
+        })
+
+        self.assertEqual(200, response.status_code)
+        account_id = response.json()['id']
+
+        request_id = str(uuid.uuid4())
+        client_batch_id = str(uuid.uuid4())
+        response = create_pib_async({
+            'request_id': request_id,
+            'posting_instruction_batch': {
+                'client_batch_id': f"{client_batch_id}_1",
+                'client_id': "deposits-core-kkk",
+                'posting_instructions': [
+                    {
+                        'client_transaction_id': str(uuid.uuid4()),
+                        'inbound_hard_settlement': {
+                            "amount": "30",
+                            "denomination": "USD",
+                            "target_account": {
+                                "account_id": account_id
+                            },
+                            "internal_account_id": self.internal_account_id
+                        },
+                        "instruction_details": {}
+                    }
+                ]
+            }
+        })
+        self.assertEqual(200, response.status_code)
+        time.sleep(3)
+        response = fetch_balances_live(account_id=account_id, address='CASHBACK')
+        self.assertEqual(200, response.status_code)
+        balances = response.json()['balances']
+        self.assertEqual(1, len(balances))
+        self.assertEqual('0.3', balances[0]['amount'])
