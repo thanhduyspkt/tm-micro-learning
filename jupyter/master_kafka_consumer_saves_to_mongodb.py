@@ -7,7 +7,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-KAFKA_ENDPOINT = 'bootstrap.kafka.partner-eph-6.tmachine.io:443'
+KAFKA_ENDPOINT = 'bootstrap.kafka.partner-shared-sandbox.thirsty-fish-dephub.tmachine.io:443'
 
 # BALANCE_EVENTS_TOPIC = 'vault.core_api.v1.balances.account_balance.events'
 
@@ -54,7 +54,8 @@ def main():
             'vault.core_api.v1.plans.plan_migration.events',
 
             'vault.core_api.v1.restrictions.restriction_set.events',
-
+            'integration.postings_api.deposits-core-kkk-high.response',
+            'integration.postings_api.deposits-core-kkk-low.response'
             'vault.api.v1.postings.posting_instruction_batch.created',
             'vault.core.postings.requests.v1',
             'vault.core_api.v1.postings.enriched_posting_instruction_batch.events',
@@ -73,14 +74,13 @@ def main():
 
         # group_id = str(os.getpid())
         group_id = 'for-pvga-master-consumer-v2'
-        auto_offset_reset = 'earliest'
+        auto_offset_reset = 'latest'
         kafka_security_protocol = "SSL"
         api_version = (0, 8, 2)
 
         consumer = KafkaConsumer(group_id=group_id, auto_offset_reset=auto_offset_reset,
                                  bootstrap_servers=KAFKA_ENDPOINT,
-                                 security_protocol=kafka_security_protocol,
-                                 api_version=api_version)
+                                 security_protocol=kafka_security_protocol)
 
         consumer.subscribe(topics=topics)
 
@@ -113,9 +113,13 @@ def main():
 
 
 def connect_to_mongo_db():
+    username = "mongodb"
+    password = "mongodb"
+    host = "localhost"
+    port = "27017"
     # Connect to MongoDB and vault_customer database
     try:
-        client = MongoClient('localhost', 27017)
+        client = MongoClient(f"mongodb://{username}:{password}@{host}:{port}/?authSource=admin")
         db = client.vault_events
 
         print("Connected successfully!")
@@ -130,8 +134,8 @@ def insert_into_mongo_db(db, topic, record_consumed):
         # collection_name = topic.replace('vault.core_api.', '')
         db[topic].insert_one(record_consumed)
         # db.balance_events.insert_one(record_consumed)
-    except:
-        print("record badly formatted to be inserted into mondo db")
+    except Exception as ex:
+        print(f"record badly formatted to be inserted into mondo db {ex}")
         print(json.dumps(record_consumed, indent=1))
 
         """ you can use the following query string to search for bad_record in mongo_db 
