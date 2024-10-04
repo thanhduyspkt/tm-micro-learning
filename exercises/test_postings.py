@@ -1,3 +1,4 @@
+import datetime
 import time
 import unittest
 import uuid
@@ -6,10 +7,14 @@ from core_api import create_customer, create_account, create_pib_async, fetch_po
 from environment import POSTING_CLIENT_ID, PIB_STATUS_ACCEPTED, PIB_STATUS_REJECTED, POSTING_CREATED_TOPIC, \
     POSTING_RESPONSE_TOPIC
 from kafka_api import create_pib_kafka_async
-from kafka_kk import KafkaUtils
+from kafka_kk import KafkaUtils, setup_consumer
 
 
 class TestPostings(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        setup_consumer(POSTING_CREATED_TOPIC)
+
     def setUp(self):
         self.internal_account_id = "1"
         self.product_id = 'simple_contract_kk'
@@ -256,7 +261,7 @@ class TestPostings(unittest.TestCase):
 
         request_id = str(uuid.uuid4())
         client_batch_id = str(uuid.uuid4())
-        response = create_pib_async({
+        create_pib_kafka_async({
             'request_id': request_id,
             'posting_instruction_batch': {
                 'client_batch_id': f"{client_batch_id}_1",
@@ -277,7 +282,7 @@ class TestPostings(unittest.TestCase):
                 ]
             }
         })
-        self.assertEqual(200, response.status_code)
+
         time.sleep(3)
         postings_result = fetch_posting_instruction(client_batch_id=f"{client_batch_id}_1", account_id=account_id)
         self.assertEqual(1, len(postings_result['posting_instruction_batches']))
@@ -287,10 +292,10 @@ class TestPostings(unittest.TestCase):
     # Rest Posting API returns status 200
     # Fetch Posting response via Rest API -> status is REJECTED
     # Consume event from posting created topic -> status is REJECTED
-    # No event from the response topic
+    # One event from the response topic
     def test_create_posting_with_insufficient_fund(self):
         kafka_utils = KafkaUtils(None, 10)
-        kafka_utils.start_consuming_messages_from_topics([POSTING_CREATED_TOPIC, "integration.postings_api.deposits-core-kkk-high.response", "integration.postings_api.deposits-core-kkk-low.response"], None)
+        kafka_utils.start_consuming_messages_from_topics([POSTING_CREATED_TOPIC, POSTING_RESPONSE_TOPIC, "integration.postings_api.deposits-core-kkk-low.response"], None)
         response = create_account({
             'request_id': str(uuid.uuid4()),
             "account": {
@@ -315,7 +320,7 @@ class TestPostings(unittest.TestCase):
 
         request_id = str(uuid.uuid4())
         client_batch_id = str(uuid.uuid4())
-        response = create_pib_async({
+        create_pib_kafka_async({
             'request_id': request_id,
             'posting_instruction_batch': {
                 'client_batch_id': f"{client_batch_id}_1",
@@ -336,7 +341,7 @@ class TestPostings(unittest.TestCase):
                 ]
             }
         })
-        self.assertEqual(200, response.status_code)
+        # self.assertEqual(200, response.status_code)
         time.sleep(3)
         postings_result = fetch_posting_instruction(client_batch_id=f"{client_batch_id}_1", account_id=account_id)
         self.assertEqual(1, len(postings_result['posting_instruction_batches']))
@@ -346,6 +351,11 @@ class TestPostings(unittest.TestCase):
         response_messages = kafka_utils.get_messages_from_posting_created_topic(POSTING_CREATED_TOPIC, f"{client_batch_id}_1")
         self.assertEqual(1, len(response_messages))
         self.assertEqual(PIB_STATUS_REJECTED, response_messages[0]['posting_instruction_batch']['status'])
+
+        response_messages = kafka_utils.get_message_from_posting_response_topic(POSTING_RESPONSE_TOPIC,
+                                                                                f"{client_batch_id}_1")
+        self.assertEqual(1, len(response_messages))
+        self.assertEqual(PIB_STATUS_REJECTED, response_messages[0]['status'])
 
     # credit 30 USD to main account
     # 1% of credit amount (0.3 USD) will be sent to CASHBACK address
@@ -374,7 +384,7 @@ class TestPostings(unittest.TestCase):
 
         request_id = str(uuid.uuid4())
         client_batch_id = str(uuid.uuid4())
-        response = create_pib_async({
+        create_pib_kafka_async({
             'request_id': request_id,
             'posting_instruction_batch': {
                 'client_batch_id': f"{client_batch_id}_1",
@@ -395,10 +405,171 @@ class TestPostings(unittest.TestCase):
                 ]
             }
         })
-        self.assertEqual(200, response.status_code)
+
         time.sleep(3)
         response = fetch_balances_live(account_id=account_id, address='CASHBACK')
         self.assertEqual(200, response.status_code)
         balances = response.json()['balances']
         self.assertEqual(1, len(balances))
         self.assertEqual('0.3', balances[0]['amount'])
+
+    def test_create_backdated_posting(self):
+        opening_timestamp = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        kafka_utils = KafkaUtils(None, 20)
+        kafka_utils.start_consuming_messages_from_topics([POSTING_CREATED_TOPIC, "integration.postings_api.deposits-core-kkk-high.response", "integration.postings_api.deposits-core-kkk-low.response", 'vault.core_api.v1.balances.balance.events', 'vault.core_api.v1.balances.account_balance.events'], None)
+        response = create_account({
+            'request_id': str(uuid.uuid4()),
+            "account": {
+                "product_version_id": '742',
+                "stakeholder_ids": [
+                    self.customer_id
+                ],
+                "instance_param_vals": {
+                    "internal_account": self.internal_account_id,
+                    "opening_bonus": "20.0",
+                    "interest_rate": "0.05",
+                },
+                "details": {},
+                "status": "ACCOUNT_STATUS_OPEN",
+                'opening_timestamp': opening_timestamp
+            }
+        })
+
+        self.assertEqual(200, response.status_code)
+        account_id = response.json()['id']
+
+        request_id = str(uuid.uuid4())
+        client_batch_id = str(uuid.uuid4())
+        value_timestamp = datetime.datetime.utcnow().replace(minute=0, second=0).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        create_pib_kafka_async({
+            'request_id': request_id,
+            'posting_instruction_batch': {
+                'client_batch_id': f"{client_batch_id}_1",
+                'client_id': "deposits-core-kkk",
+                'value_timestamp': value_timestamp,
+                'posting_instructions': [
+                    {
+                        'client_transaction_id': str(uuid.uuid4()),
+                        'inbound_hard_settlement': {
+                            "amount": "10",
+                            "denomination": "USD",
+                            "target_account": {
+                                "account_id": account_id
+                            },
+                            "internal_account_id": self.internal_account_id
+                        },
+                        "instruction_details": {}
+                    }
+                ]
+            }
+        })
+        # self.assertEqual(200, response.status_code)
+
+        request_id = str(uuid.uuid4())
+        client_batch_id = str(uuid.uuid4())
+        value_timestamp = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        create_pib_kafka_async({
+            'request_id': request_id,
+            'posting_instruction_batch': {
+                'client_batch_id': f"{client_batch_id}_1",
+                'client_id': "deposits-core-kkk",
+                'value_timestamp': value_timestamp,
+                'posting_instructions': [
+                    {
+                        'client_transaction_id': str(uuid.uuid4()),
+                        'outbound_hard_settlement': {
+                            "amount": "2",
+                            "denomination": "USD",
+                            "target_account": {
+                                "account_id": account_id
+                            },
+                            "internal_account_id": self.internal_account_id
+                        },
+                        "instruction_details": {}
+                    }
+                ]
+            }
+        })
+        # self.assertEqual(200, response.status_code)
+
+        request_id = str(uuid.uuid4())
+        client_batch_id = str(uuid.uuid4())
+        value_timestamp = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        create_pib_kafka_async({
+            'request_id': request_id,
+            'posting_instruction_batch': {
+                'client_batch_id': f"{client_batch_id}_1",
+                'client_id': "deposits-core-kkk",
+                'value_timestamp': value_timestamp,
+                'posting_instructions': [
+                    {
+                        'client_transaction_id': str(uuid.uuid4()),
+                        'outbound_hard_settlement': {
+                            "amount": "1",
+                            "denomination": "USD",
+                            "target_account": {
+                                "account_id": account_id
+                            },
+                            "internal_account_id": self.internal_account_id
+                        },
+                        "instruction_details": {}
+                    }
+                ]
+            }
+        })
+        # self.assertEqual(200, response.status_code)
+
+        request_id = str(uuid.uuid4())
+        client_batch_id = str(uuid.uuid4())
+        value_timestamp = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        create_pib_kafka_async({
+            'request_id': request_id,
+            'posting_instruction_batch': {
+                'client_batch_id': f"{client_batch_id}_1",
+                'client_id': "deposits-core-kkk",
+                'value_timestamp': value_timestamp,
+                'posting_instructions': [
+                    {
+                        'client_transaction_id': str(uuid.uuid4()),
+                        'outbound_hard_settlement': {
+                            "amount": "3",
+                            "denomination": "USD",
+                            "target_account": {
+                                "account_id": account_id
+                            },
+                            "internal_account_id": self.internal_account_id
+                        },
+                        "instruction_details": {}
+                    }
+                ]
+            }
+        })
+        # self.assertEqual(200, response.status_code)
+
+        request_id = str(uuid.uuid4())
+        client_batch_id = str(uuid.uuid4())
+        value_timestamp = datetime.datetime.utcnow().replace(minute=0, second=1).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        create_pib_kafka_async({
+            'request_id': request_id,
+            'posting_instruction_batch': {
+                'client_batch_id': f"{client_batch_id}_1",
+                'client_id': "deposits-core-kkk",
+                'value_timestamp': value_timestamp,
+                'posting_instructions': [
+                    {
+                        'client_transaction_id': str(uuid.uuid4()),
+                        'outbound_hard_settlement': {
+                            "amount": "3",
+                            "denomination": "USD",
+                            "target_account": {
+                                "account_id": account_id
+                            },
+                            "internal_account_id": self.internal_account_id
+                        },
+                        "instruction_details": {}
+                    }
+                ]
+            }
+        })
+        # self.assertEqual(200, response.status_code)
+        kafka_utils.get_messages_map()

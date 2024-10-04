@@ -5,10 +5,14 @@ import uuid
 from core_api import create_pib_async, create_account, create_customer, fetch_posting_instruction
 from environment import POSTING_CLIENT_ID, POSTING_RESPONSE_TOPIC, POSTING_CREATED_TOPIC
 from kafka_api import create_pib_kafka_async
-from kafka_kk import KafkaUtils
+from kafka_kk import KafkaUtils, setup_consumer
 
 
 class TestTMIdempotent(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        setup_consumer(POSTING_CREATED_TOPIC)
 
     def setUp(self):
         self.internal_account_id = "1"
@@ -87,7 +91,7 @@ class TestTMIdempotent(unittest.TestCase):
         filter_message = lambda message: message[
                                              'client_batch_id'] == f"{client_batch_id}_1"
         kafka_utils = KafkaUtils(POSTING_RESPONSE_TOPIC, 10)
-        kafka_utils.start_consuming_messages(filter_message)
+        kafka_utils.start_consuming_messages(None)
 
         create_pib_kafka_async({
             'request_id': request_id,

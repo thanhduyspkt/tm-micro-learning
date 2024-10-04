@@ -29,7 +29,7 @@ api_version = (0, 8, 2)
 #     # 'sasl.password': TM_KAFKA_SASL_PLAIN_PASSWORD,
 # }
 
-group_id = 'kaka_group_134'
+group_id = ''
 
 def produce_messages(topic, messages):
     producer = KafkaProducer(
@@ -46,6 +46,25 @@ def produce_messages(topic, messages):
     finally:
         producer.close()
 
+def setup_consumer(topic):
+    global group_id
+    group_id = str(uuid.uuid4())
+    kafka_consumer = KafkaConsumer(
+        topic,  # Replace with your Kafka topic
+        bootstrap_servers=[TM_KAFKA_URL],  # Replace with your Kafka broker(s)
+        security_protocol=TM_KAFKA_PROTOCOL,
+        auto_offset_reset='latest',  # Start reading from the latest message
+        enable_auto_commit=True,  # Auto-commit the offsets
+        group_id=group_id,  # Replace with your consumer group ID,
+        value_deserializer=lambda x: x.decode('utf-8')
+    )
+    start_time = time.time()
+    try:
+        while time.time() - start_time < 3:
+            # print(f"polling messages from topic {topic}")
+            kafka_consumer.poll(timeout_ms=500)
+    finally:
+        kafka_consumer.close()
 
 def consumer_messages(topic, filter_func, consolidate_func, consuming_time = 30):
     kafka_consumer = KafkaConsumer(
@@ -97,6 +116,21 @@ class KafkaUtils:
 
         print("--- END ---")
         return self.messages_map
+
+    def get_message_from_posting_response_topic(self, topic, client_batch_id):
+        if os.getenv('source_of_events') == 'mongodb':
+            query = {"client_batch_id": client_batch_id}
+            db = connect_to_mongo_db()
+            collection = db[topic]
+            results = []
+            documents = collection.find(query)
+            for doc in documents:
+                results.append(doc)
+            return results
+
+        messages_map = self.get_messages_map()
+        return [x for x in messages_map[topic] if
+                             x['client_batch_id'] == client_batch_id]
 
     def get_messages_from_posting_created_topic(self, topic, client_batch_id):
         if os.getenv('source_of_events') == 'mongodb':
@@ -176,7 +210,7 @@ class KafkaUtils:
                         for tp, messages in message.items():
                             for msg in messages:
                                 json_message = json.loads(msg.value)
-                                if filter_func(json_message):
+                                if filter_func is None or filter_func(json_message):
                                     self.messages.append(json_message)
                                 else:
                                     print(f"skip message {msg.value}")
